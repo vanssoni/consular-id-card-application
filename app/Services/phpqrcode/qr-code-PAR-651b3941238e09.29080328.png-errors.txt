@@ -1,0 +1,1 @@
+2023-10-02 21:42:25: imagepng(/public/participants/qr-codes/qr-code-PAR-651b3941238e09.29080328.png): Failed to open stream: No such file or directory
