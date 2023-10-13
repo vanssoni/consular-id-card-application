@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import callApi from "../api/callApi";
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from "../components/Navbar";
-import { NavLink } from "react-router-dom";
+import {useNavigate, NavLink } from "react-router-dom";
 import SingleParticipantRow from "../components/SingleParticipantRow";
 
 import Table from "@material-ui/core/Table";
@@ -33,6 +33,7 @@ function Participant() {
     const [data, setData] = useState([]);
     const [updateData, setUpdateData] = useState(false);
     const [searchQuery, setSearchQuery] = useState([]);
+    const navigate = useNavigate();
     let apiUrl = '/participants?per_page=' + perPage;
     //set the current page
     function handlePageClick(url) {
@@ -62,6 +63,9 @@ function Participant() {
             setData(res.data.data);
             console.log(res.data.data);
         }).catch((error) => {
+            if (error?.response?.status === 401) {
+                navigate('/login');
+            }
             if (error?.response?.status) {
                 error?.response?.data?.message && toast.error(error?.response?.data?.message, {
                     position: "top-right",

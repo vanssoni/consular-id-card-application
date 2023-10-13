@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
-import { NavLink } from "react-router-dom";
+import { NavLink,useNavigate } from "react-router-dom";
 
 import TableRow from "@material-ui/core/TableRow";
 import Collapse from "@material-ui/core/Collapse";
@@ -14,15 +14,68 @@ import fontawesome from '@fortawesome/fontawesome';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import SweetAlert from 'react-bootstrap-sweetalert';
+import callApi from "../api/callApi";
 
 import { faCaretUp, faCaretDown, faPencilAlt, faTrash, faPrint, faEnvelope } from '@fortawesome/fontawesome-free-solid'
 fontawesome.library.add(faCaretUp, faCaretDown,faPencilAlt, faTrash, faPrint, faEnvelope);
+
+import { toast } from 'react-toastify';
 function SingleParticipantRow(props) {
     const [open, setOpen] = useState(false);
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-    const handleDelete = () => {
+    const { getToken, http } = callApi();
+    const navigate = useNavigate();
+
+    const handleDelete = (id) => {
         // Implement your delete logic here
-        console.log('Delete operation executed');
+        http.delete('participants/'+id, {
+            headers: {
+                'Authorization': 'Bearer ' + getToken(),
+            }
+        }).then((res) => {
+            if (!res.data.success ) {
+                setErrors(res.data.errors);
+                res?.data?.message && toast.error(res?.data?.message, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                return false;
+            }
+
+            res?.data?.message && toast.success(res?.data?.message, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            
+        }).catch((error) => {
+            if (error?.response?.status === 401) {
+                navigate('/login');
+            }
+            if (error?.response?.status) {
+                error?.response?.data?.message && toast.error(error?.response?.data?.message, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+            }
+        });
         setShowDeleteAlert(false); // Close the confirmation modal
         props.stateChanger(true);
     };
@@ -60,7 +113,7 @@ function SingleParticipantRow(props) {
                         confirmBtnText="Yes, delete it!"
                         confirmBtnBsStyle="danger"
                         title="Are you sure?"
-                        onConfirm={handleDelete}
+                        onConfirm={ () => handleDelete(props?.row?.id)}
                         onCancel={() => setShowDeleteAlert(false)}
                         focusCancelBtn
                         >

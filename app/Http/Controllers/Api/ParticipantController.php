@@ -40,4 +40,24 @@ class ParticipantController extends Controller
         $participant = Participant::findOrFail($id);
         return response()->json($participantService->createUpdate($request->validated()));
     }
+    
+    // delete participant
+    public function destroy( $id ){
+
+        $participant = Participant::findOrFail($id);
+        if($participant){
+            $participant->delete();
+
+            return response()->json([
+                'success' => true,
+                'data' => '',
+                'message' => 'Participant deleted successfully!',
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'data' => '',
+            'message' => 'Something went wrong!',
+        ]);
+    }
 }
